@@ -1,0 +1,288 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<title>JAAAAZDA</title>
+<style>
+html, body
+{
+	height:100%;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+	background: url('bg.jpg');d
+	background-size: 30%;
+}
+.enemy
+{
+	width: 40px;
+	height: 85px;
+	position: absolute;
+	z-index: 100;
+	transform: rotate(-180deg);
+}
+#player
+{
+	width: 40px;
+	height: 100px;
+	position: absolute;
+	z-index: 200;
+}
+img
+{
+	width: 40px;
+	height: 85px;
+}
+#field
+{
+	height: 100%;
+	position: absolute;
+	background: grey;
+}
+.line
+{
+	width: 3px;
+	height: 70px;
+	position: absolute;
+	background: white;
+}
+</style>
+</head>
+<body>
+	<div id="field"></div>
+	<div class="enemy" id="1"><img src="car.png"></div>
+	<div class="enemy" id="2"><img src="car.png"></div>
+	<div class="enemy" id="3"><img src="car.png"></div>
+	<div class="enemy" id="4"><img src="car.png"></div>
+	<div class="enemy" id="5"><img src="car.png"></div>
+	<div id="player"><img src="carB.png"></div>
+	<div class="line" id="L0"></div>
+	<div class="line" id="L1"></div>
+	<div class="line" id="L2"></div>
+	<div class="line" id="L3"></div>
+	<div class="line" id="L4"></div>
+	<div class="line" id="L5"></div>
+	<div class="line" id="L6"></div>
+	<div class="line" id="L7"></div>
+	<div class="line" id="L8"></div>
+	<div class="line" id="L9"></div>
+	<div class="line" id="R0"></div>
+	<div class="line" id="R1"></div>
+	<div class="line" id="R2"></div>
+	<div class="line" id="R3"></div>
+	<div class="line" id="R4"></div>
+	<div class="line" id="R5"></div>
+	<div class="line" id="R6"></div>
+	<div class="line" id="R7"></div>
+	<div class="line" id="R8"></div>
+	<div class="line" id="R9"></div>
+<script>
+
+var speed = 10;
+
+function get(x)
+{
+	return document.getElementById(x);
+}
+
+get("field").style.left = innerWidth/2 - 100;
+get("field").style.width = "240px";
+
+var line = 0;
+var points = 0;
+var bgPos = 0;
+
+var player =
+{
+	x: innerWidth/2,
+	y: innerHeight-150,
+	spdL: 0,
+	spdR: 0,
+	spd: 0,
+	alive: true,
+	update: function()
+	{
+		this.spd = this.spdL + this.spdR;
+		this.x += this.spd;
+		if(this.x>innerWidth/2+100)this.x = innerWidth/2+100;
+		if(this.x<innerWidth/2-100)this.x = innerWidth/2-100;
+		get("player").style.left = this.x;
+		get("player").style.top = this.y;
+		if(this.spd<0)get("player").style.transform = "rotate(-3deg)";
+		else if(this.spd>0)get("player").style.transform = "rotate(3deg)";
+		else get("player").style.transform = "rotate(0deg)";
+		for(let i=0;i<5;i++)
+		{
+			if(this.x<enemies[i].x+35 && this.x+35>enemies[i].x && this.y<enemies[i].y+80 && this.y+80>enemies[i].y)
+			{
+				this.alive = false;
+				alert("GAME OVER! Score: "+points);
+			}
+		}
+	}
+};
+
+class Enemy
+{
+	constructor(id,y)
+	{
+		this.id = id;
+		this.y = y;
+		this.x = Math.random()*200-100 + innerWidth/2;
+		this.on = true;
+		if(this.id > 1)this.priev = this.id - 2;
+		else this.priev = 4;
+	}
+	update()
+	{
+		if(this.on)
+		{
+			this.y+= speed;
+		}
+		get(this.id).style.left = this.x;
+		get(this.id).style.top = this.y;
+		if(this.y>innerHeight)
+		{
+			this.y = -100;
+			this.on = false;
+			this.x = Math.random()*200-100 + innerWidth/2;
+			speed += 0.05;
+			points++;
+		}
+		if(!this.on && enemies[this.priev].y-this.y > 350)
+		{
+			this.on = true;
+		}
+	}
+}
+var enemies = [];
+for(let i=1;i<=5;i++)
+{
+	enemies.push(new Enemy(i,-i*350));
+}
+
+class LineL
+{
+	constructor(id,y)
+	{
+		this.id = id;
+		this.x = innerWidth/2-20;
+		this.y = y;
+		this.on = true;
+		get("L"+this.id).style.left = this.x;
+		get("L"+this.id).style.top = this.y;
+		if(this.id > 0)this.priev = this.id - 1;
+		else this.priev = 9;
+	}
+	update()
+	{
+		if(this.on)
+		{
+			this.y += 0.8*speed;
+			get("L"+this.id).style.top = this.y;
+		}
+		if(this.y>innerHeight)
+		{
+			this.y = -100;
+			this.on = false;
+		}
+		if(!this.on && linesL[this.priev].y-this.y > 100)
+		{
+			this.on = true;
+		}
+	}
+}
+
+class LineR
+{
+	constructor(id,y)
+	{
+		this.id = id;
+		this.x = innerWidth/2+60;
+		this.y = y;
+		this.on = true;
+		get("R"+this.id).style.left = this.x;
+		get("R"+this.id).style.top = this.y;
+		if(this.id > 0)this.priev = this.id - 1;
+		else this.priev = 9;
+	}
+	update()
+	{
+		if(this.on)
+		{
+			this.y += 0.8*speed;
+			get("R"+this.id).style.top = this.y;
+		}
+		if(this.y>innerHeight)
+		{
+			this.y = -100;
+			this.on = false;
+		}
+		if(!this.on && linesR[this.priev].y-this.y > 100)
+		{
+			this.on = true;
+		}
+	}
+}
+var linesL = [];
+var linesR = [];
+for(let i=0;i<10;i++)
+{
+	linesL.push(new LineL(i,-100*i));
+}
+for(let i=0;i<10;i++)
+{
+	linesR.push(new LineR(i,-100*i));
+}
+
+window.addEventListener('keydown',function(e)
+{
+	if(e.keyCode == "65")
+	{
+		player.spdL = -5;
+	}
+	if(e.keyCode == "68")
+	{
+		player.spdR = 5;
+	}
+});
+
+window.addEventListener('keyup',function(e)
+{
+	if(e.keyCode == "65")
+	{
+		player.spdL = 0;
+	}
+	if(e.keyCode == "68")
+	{
+		player.spdR = 0;
+	}
+});
+
+function animate()
+{
+	bgPos++;
+	document.body.style.backgroundPosition = "0 "+bgPos;
+	document.body.style.backgroundSize = "30%";
+	if(player.alive)
+	{
+		player.update();
+		for(let i=0;i<enemies.length;i++)
+		{
+			enemies[i].update();
+		}
+		for(let i=0;i<linesL.length;i++)
+		{
+			linesL[i].update();
+		}
+		for(let i=0;i<linesR.length;i++)
+		{
+			linesR[i].update();
+		}
+		window.requestAnimationFrame(animate);
+	}
+}
+animate();
+
+</script>
+</body>
+</html>
